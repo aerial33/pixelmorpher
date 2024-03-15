@@ -1,16 +1,5 @@
 import { Schema, models, model } from 'mongoose'
 
-interface IUser extends Document {
-	clerkId: string
-	email: string
-	username: string
-	photo: string
-	firstName: string
-	lastName: string
-	planId: number
-	creditBalance: number
-}
-
 const userSchema = new Schema({
 	clerkId: { type: String, required: true, unique: true },
 	email: { type: String, required: true, unique: true },
