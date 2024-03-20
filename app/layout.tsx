@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<ClerkProvider appearance={{ variables: { colorPrimary: '#624cf5' } }}>
-			<html lang='en'>
+			<html lang='en' suppressHydrationWarning={true}>
 				<body className={cn('font-inter antialiased', inter.variable)}>
 					{children}
 				</body>
