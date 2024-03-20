@@ -1,3 +1,8 @@
+/**
+ * MediaUploader component allows uploading an image to Cloudinary
+ * via the CldUploadWidget, displays the uploaded image, and passes
+ * the publicId back via the onValueChange callback.
+ */
 'use client'
 
 import { useToast } from '@/components/ui/use-toast'

@@ -1,3 +1,10 @@
+/**
+ * CustomField component renders a form field with label, input,
+ * message etc. It takes in a control prop from React Hook Form,
+ * a render prop function to render the input, a name prop corresponding
+ * to the field name, an optional label, and an optional className.
+ * It renders the field using the FormField component from the form lib.
+ */
 import { Control } from 'react-hook-form'
 import { z } from 'zod'
 
