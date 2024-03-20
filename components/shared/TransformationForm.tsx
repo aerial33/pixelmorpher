@@ -1,9 +1,14 @@
+/**
+ * TransformationForm component renders a form to configure image transformations.
+ * Allows user to set title, aspect ratio, prompt, and other properties.
+ * Handles form submission and transformation requests.
+ */
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 
 import {
 	Select,
@@ -31,7 +36,8 @@ import {
 	transformationTypes,
 } from '@/constants'
 import { CustomField } from './CustomField'
-import { AspectRatioKey } from '@/lib/utils'
+import { AspectRatioKey, debounce, deepMergeObjects } from '@/lib/utils'
+import { set } from 'mongoose'
 
 export const formSchema = z.object({
 	title: z.string(),
@@ -56,6 +62,7 @@ const TransformationForm = ({
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [isTransforming, setIsTransforming] = useState(false)
 	const [transformationConfig, setTransformationConfig] = useState(config)
+	const [isPending, startTransition] = useTransition()
 
 	const initialValues =
 		data && action === 'Update'
@@ -79,19 +86,75 @@ const TransformationForm = ({
 		console.log(values)
 	}
 
+	/**
+	 * Handles selecting a field value from the aspect ratio options.
+	 * Updates the image state with the new aspect ratio, width, and height.
+	 * Also updates the transformation config state.
+	 * Finally calls the onChangeField callback with the new value.
+	 */
 	const onSelectFieldHandler = (
 		value: string,
 		onChangeField: (value: string) => void
-	) => {}
+	) => {
+		const imageSize = aspectRatioOptions[value as AspectRatioKey]
 
-	const onTransformHandler = () => {}
+		setImage((prevState: any) => ({
+			...prevState,
+			aspectRation: imageSize.aspectRatio,
+			width: imageSize.width,
+			height: imageSize.height,
+		}))
 
+		setNewTransformation(transformationType.config)
+		return onChangeField(value)
+	}
+
+	//TODO: Return to updateCredits
+	/**
+	 * Handles transforming the image when the transform button is clicked.
+	 * Sets the isTransforming state to true to show a loading indicator.
+	 * Merges the latest transformation config into the existing config.
+	 * Clears the newTransformation state.
+	 * Starts a transition to update credits.
+	 * Sets isTransforming to false when done to hide loading indicator.
+	 */
+	const onTransformHandler = async () => {
+		setIsTransforming(true)
+
+		setTransformationConfig(
+			deepMergeObjects(newTransformation, transformationConfig)
+		)
+
+		setNewTransformation(null)
+
+		startTransition(async () => {
+			// await updateCredits(userId, creditFee)
+		})
+	}
+
+	/**
+	 * Handles input change for transformation form fields.
+	 * Debounces calling setNewTransformation to update transformation config.
+	 * Calls onChangeField callback with new value.
+	 */
 	const onInputChangeHandler = (
 		fieldName: string,
 		type: string,
 		value: string,
 		onChangeField: (value: string) => void
-	) => {}
+	) => {
+		debounce(() => {
+			setNewTransformation((prevState: any) => ({
+				...prevState,
+				[type]: {
+					...prevState?.[type],
+					[fieldName === 'prompt' ? 'prompt' : 'to']: value,
+				},
+			}))
+
+			return onChangeField(value)
+		}, 1000)
+	}
 
 	return (
 		<Form {...form}>
