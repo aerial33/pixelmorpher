@@ -230,11 +230,17 @@ const TransformationForm = ({
 		}, 1000)
 	}
 
+	/**
+	 * Updates the newTransformation state with the default config
+	 * when the image loads or the transformation type changes,
+	 * for "restore" and "removeBackground" types.
+	 */
 	useEffect(() => {
 		if (image && (type === 'restore' || type === 'removeBackground')) {
 			setNewTransformation(transformationType.config)
 		}
 	}, [image, transformationType.config, type])
+
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
