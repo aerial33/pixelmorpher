@@ -8,13 +8,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { CustomField } from './CustomField'
 import { AspectRatioKey, debounce, deepMergeObjects } from '@/lib/utils'
 import { set } from 'mongoose'
 import MediaUploader from './MediaUploader'
 import TransformedImage from './TransformedImage'
 import { updateCredits } from '@/lib/actions/user.actions'
+import { getCldImageUrl } from 'next-cloudinary'
+import { addImage, updateImage } from '@/lib/actions/image.actions'
+import { useRouter } from 'next/navigation'
+import { InsufficientCreditsModal } from './InsufficientCreditsModal'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -38,12 +42,10 @@ import {
 import { Input } from '@/components/ui/input'
 import {
 	aspectRatioOptions,
+	creditFee,
 	defaultValues,
 	transformationTypes,
 } from '@/constants'
-import { getCldImageUrl } from 'next-cloudinary'
-import { addImage, updateImage } from '@/lib/actions/image.actions'
-import { useRouter } from 'next/navigation'
 
 export const formSchema = z.object({
 	title: z.string(),
@@ -89,6 +91,11 @@ const TransformationForm = ({
 	})
 
 	// 2. Define a submit handler.
+	/**
+	 * Submits the form and handles the add/update image action based on the form values.
+	 * If adding a new image, it will reset the form and navigate to the new image page on success.
+	 * If updating an existing image, it will navigate to the existing image page on success.
+	 */
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setIsSubmitting(true)
 
@@ -177,7 +184,6 @@ const TransformationForm = ({
 		return onChangeField(value)
 	}
 
-	//TODO: Update creditFee more dynamic
 	/**
 	 * Handles transforming the image when the transform button is clicked.
 	 * Sets the isTransforming state to true to show a loading indicator.
@@ -196,7 +202,7 @@ const TransformationForm = ({
 		setNewTransformation(null)
 
 		startTransition(async () => {
-			await updateCredits(userId, -1)
+			await updateCredits(userId, creditFee)
 		})
 	}
 
@@ -224,9 +230,15 @@ const TransformationForm = ({
 		}, 1000)
 	}
 
+	useEffect(() => {
+		if (image && (type === 'restore' || type === 'removeBackground')) {
+			setNewTransformation(transformationType.config)
+		}
+	}, [image, transformationType.config, type])
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+				{creditBalance < Math.abs(creditFee) && <InsufficientCreditsModal />}
 				<CustomField
 					control={form.control}
 					name='title'
