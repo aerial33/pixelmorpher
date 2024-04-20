@@ -10,7 +10,12 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useEffect, useState, useTransition } from 'react'
 import { CustomField } from './CustomField'
-import { AspectRatioKey, debounce, deepMergeObjects } from '@/lib/utils'
+import {
+	AspectRatioKey,
+	dataUrl,
+	debounce,
+	deepMergeObjects,
+} from '@/lib/utils'
 import { set } from 'mongoose'
 import MediaUploader from './MediaUploader'
 import TransformedImage from './TransformedImage'
@@ -213,8 +218,8 @@ const TransformationForm = ({
 	 */
 	const onInputChangeHandler = (
 		fieldName: string,
-		type: string,
 		value: string,
+		type: string,
 		onChangeField: (value: string) => void
 	) => {
 		debounce(() => {
@@ -225,9 +230,10 @@ const TransformationForm = ({
 					[fieldName === 'prompt' ? 'prompt' : 'to']: value,
 				},
 			}))
+		}, 1000)()
 
-			return onChangeField(value)
-		}, 1000)
+		console.log(type)
+		return onChangeField(value)
 	}
 
 	/**
@@ -310,6 +316,8 @@ const TransformationForm = ({
 							<CustomField
 								control={form.control}
 								name='color'
+								formLabel='Replacement Color'
+								className='w-full'
 								render={({ field }) => (
 									<Input
 										value={field.value}
@@ -324,8 +332,6 @@ const TransformationForm = ({
 										}
 									/>
 								)}
-								formLabel='Replacement Color'
-								className='w-full'
 							/>
 						)}
 					</div>

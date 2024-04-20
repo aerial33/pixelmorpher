@@ -51,7 +51,7 @@ const TransformedImage = ({
 						width={getImageSize(type, image, 'width')}
 						height={getImageSize(type, image, 'height')}
 						src={image?.publicId}
-						alt={`image`}
+						alt={title}
 						sizes={'(max-width: 767px) 100vw, 50vw'}
 						placeholder={dataUrl as PlaceholderValue}
 						className='transformed-image'
@@ -61,7 +61,7 @@ const TransformedImage = ({
 						onError={() => {
 							debounce(() => {
 								setIsTransforming && setIsTransforming(false)
-							}, 8000)
+							}, 8000)()
 						}}
 						{...transformationConfig}
 					/>
@@ -72,8 +72,9 @@ const TransformedImage = ({
 								src='/assets/icons/spinner.svg'
 								width={50}
 								height={50}
-								alt='Transforming'
+								alt='spinner'
 							/>
+							<p className='text-white/80'>Please wait...</p>
 						</div>
 					)}
 				</div>
